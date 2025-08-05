@@ -1,0 +1,10 @@
+Subject: Hi {name}, quick question for you [#{id}]
+
+Hi {name},
+
+I hope you're doing well. I wanted to reach out about [your offer or topic here—customize this]. 
+
+Would you be open to a quick chat or reply if this is of interest?
+
+Best,
+Ansh Kothari Test
