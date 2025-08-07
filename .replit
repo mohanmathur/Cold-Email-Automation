@@ -1,0 +1,37 @@
+packager.language = "python3"
+run = "python email_automation.py"
+modules = ["python-3.11"]
+
+[nix]
+channel = "stable-25_05"
+
+[[ports]]
+localPort = 4583
+externalPort = 3000
+
+[[ports]]
+localPort = 5000
+externalPort = 5000
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[[ports]]
+localPort = 8081
+externalPort = 8081
+
+[workflows]
+runButton = "Web App"
+
+[[workflows.workflow]]
+name = "Web App"
+author = 46032519
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python app.py"
+
+[deployment]
+run = ["sh", "-c", "python app.py"]

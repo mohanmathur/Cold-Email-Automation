@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3">Email Templates</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <form method="POST" action="{{ url_for('save_templates') }}">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Initial Email Template</h5>
+                        </div>
+                        <div class="card-body">
+                            <textarea name="initial_template" class="form-control" rows="15" placeholder="Enter your initial email template...">{{ initial_template }}</textarea>
+                            <div class="form-text mt-2">
+                                Start with <code>Subject: Your Subject Here</code> on the first line, then add your email content.<br>
+                                Use <code>{name}</code> to insert the contact's name dynamically in both subject and body.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Follow-up Email Template</h5>
+                        </div>
+                        <div class="card-body">
+                            <textarea name="followup_template" class="form-control" rows="15" placeholder="Enter your follow-up email template...">{{ followup_template }}</textarea>
+                            <div class="form-text mt-2">
+                                Start with <code>Subject: Your Subject Here</code> on the first line, then add your email content.<br>
+                                Use <code>{name}</code> to insert the contact's name dynamically in both subject and body.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Save Templates
+                    </button>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

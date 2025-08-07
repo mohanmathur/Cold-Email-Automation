@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3">All Contacts</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Contact List</h5>
+                <a href="{{ url_for('upload_contacts') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Contacts
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Initial Sent</th>
+                                <th>Follow-ups</th>
+                                <th>Last Activity</th>
+                                <th>Custom Follow-up</th>
+                                <th>Replied</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contact in contacts %}
+                            <tr>
+                                <td>{{ contact.id }}</td>
+                                <td>{{ contact.email }}</td>
+                                <td>{{ contact.name or 'N/A' }}</td>
+                                <td>{{ contact.initial_sent_date[:16] if contact.initial_sent_date else 'Not sent' }}</td>
+                                <td>{{ contact.followup_sent_count }}</td>
+                                <td>{{ contact.last_activity_date[:16] if contact.last_activity_date else 'N/A' }}</td>
+                                <td>
+                                    <div class="input-group">
+                                        <select class="form-select form-select-sm" id="custom_type_{{ contact.id }}" onchange="toggleCustomTimeInput({{ contact.id }})">
+                                            <option value="interval" {{ 'selected' if contact.custom_followup_time and ':' in contact.custom_followup_time }}>Interval</option>
+                                            <option value="time" {{ 'selected' if contact.custom_followup_time and ':' not in contact.custom_followup_time }}>Time</option>
+                                        </select>
+
+                                        <div id="interval_input_{{ contact.id }}" style="display: {% if contact.custom_followup_time and ':' in contact.custom_followup_time %}none{% else %}block{% endif %};" class="d-flex">
+                                            <input type="number" class="form-control form-control-sm" id="custom_value_{{ contact.id }}" 
+                                                   value="{{ contact.custom_followup_time.split(':')[0] if contact.custom_followup_time and ':' in contact.custom_followup_time else '' }}" 
+                                                   placeholder="3" min="1">
+                                            <select class="form-select form-select-sm" id="custom_unit_{{ contact.id }}">
+                                                <option value="hours" {{ 'selected' if contact.custom_followup_time and contact.custom_followup_time.endswith('hours') }}>Hours</option>
+                                                <option value="days" {{ 'selected' if not contact.custom_followup_time or contact.custom_followup_time.endswith('days') }}>Days</option>
+                                            </select>
+                                        </div>
+
+                                        <input type="time" class="form-control form-control-sm" id="custom_time_{{ contact.id }}" 
+                                               value="{{ contact.custom_followup_time if contact.custom_followup_time and ':' not in contact.custom_followup_time else '' }}" 
+                                               style="display: {% if contact.custom_followup_time and ':' not in contact.custom_followup_time %}block{% else %}none{% endif %};">
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if contact.replied %}
+                                        <span class="badge bg-success">Replied</span>
+                                    {% elif contact.initial_sent_date %}
+                                        {% if contact.followup_sent_count >= 2 %}
+                                            <span class="badge bg-danger">Max Follow-ups</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Sent</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-secondary">New</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                            <button class="btn btn-sm btn-primary" onclick="updateCustomTime({{ contact.id }})">
+                                <i class="fas fa-save"></i>
+                            </button>
+                        </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateCustomTime(contactId) {
+        const typeSelect = document.getElementById(`custom_type_${contactId}`);
+        let customTime;
+
+        if (typeSelect.value === 'time') {
+            const timeValue = document.getElementById(`custom_time_${contactId}`).value;
+            if (!timeValue) {
+                alert('Please select a time');
+                return;
+            }
+            customTime = timeValue;
+        } else {
+            const value = document.getElementById(`custom_value_${contactId}`).value;
+            const unit = document.getElementById(`custom_unit_${contactId}`).value;
+
+            if (!value || value < 1) {
+                alert('Please enter a valid delay value');
+                return;
+            }
+
+            customTime = `${value}:${unit}`;
+        }
+
+        fetch('/update_custom_time', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contact_id: contactId,
+                custom_time: customTime
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Custom follow-up time updated successfully!');
+                location.reload();
+            } else {
+                alert('Error updating custom time: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+        });
+    }
+
+    function toggleCustomTimeInput(contactId) {
+        const typeSelect = document.getElementById(`custom_type_${contactId}`);
+        const intervalInputDiv = document.getElementById(`interval_input_${contactId}`);
+        const timeInput = document.getElementById(`custom_time_${contactId}`);
+
+        if (typeSelect.value === 'time') {
+            intervalInputDiv.style.display = 'none';
+            timeInput.style.display = 'block';
+        } else {
+            intervalInputDiv.style.display = 'block';
+            timeInput.style.display = 'none';
+        }
+    }
+
+    // Initialize the display of time/interval inputs on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const contactRows = document.querySelectorAll('tbody tr');
+        contactRows.forEach(row => {
+            const contactId = row.querySelector('td').textContent;
+            toggleCustomTimeInput(contactId);
+        });
+    });
+</script>
+
+{% endblock %}

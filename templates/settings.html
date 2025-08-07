@@ -1,0 +1,170 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-cog"></i> Settings</h2>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Email Scheduler Settings -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-clock"></i> Email Scheduler Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('save_scheduler_settings') }}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="schedule_time" class="form-label">Daily Send Time (IST)</label>
+                                    <input type="time" class="form-control" id="schedule_time" name="schedule_time" 
+                                           value="{{ scheduler_settings.schedule_time }}" required>
+                                    <div class="form-text">Time when automated emails will be sent daily (India Standard Time)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Follow-up Delay</label>
+                                    <div class="mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="followup_delay_type" id="delay_interval" value="interval" 
+                                                   {{ 'checked' if not scheduler_settings.get('followup_delay_type') or scheduler_settings.followup_delay_type == 'interval' else '' }}>
+                                            <label class="form-check-label" for="delay_interval">
+                                                Interval-based (wait X hours/days)
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="followup_delay_type" id="delay_time" value="time" 
+                                                   {{ 'checked' if scheduler_settings.get('followup_delay_type') == 'time' else '' }}>
+                                            <label class="form-check-label" for="delay_time">
+                                                Time-based (send at specific time)
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div id="interval_settings" style="{{ 'display: none;' if scheduler_settings.get('followup_delay_type') == 'time' else '' }}">
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="followup_delay_value" name="followup_delay_value" 
+                                                   value="{{ scheduler_settings.followup_delay_value or scheduler_settings.followup_delay_days }}" min="1">
+                                            <select class="form-select" name="followup_delay_unit" style="max-width: 100px;">
+                                                <option value="hours" {{ 'selected' if scheduler_settings.followup_delay_unit == 'hours' else '' }}>Hours</option>
+                                                <option value="days" {{ 'selected' if scheduler_settings.followup_delay_unit == 'days' or not scheduler_settings.followup_delay_unit else '' }}>Days</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div id="time_settings" style="{{ 'display: none;' if not scheduler_settings.get('followup_delay_type') or scheduler_settings.followup_delay_type == 'interval' else '' }}">
+                                        <input type="time" class="form-control" id="followup_delay_time" name="followup_delay_time" 
+                                               value="{{ scheduler_settings.get('followup_delay_time', '14:00') }}">
+                                    </div>
+                                    <div class="form-text">Choose how to schedule follow-up emails</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="max_followups" class="form-label">Maximum Follow-ups</label>
+                                    <input type="number" class="form-control" id="max_followups" name="max_followups" 
+                                           value="{{ scheduler_settings.max_followups }}" min="1" max="10" required>
+                                    <div class="form-text">Maximum number of follow-up emails per contact</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email_delay" class="form-label">Email Delay (Seconds)</label>
+                                    <input type="number" class="form-control" id="email_delay" name="email_delay" 
+                                           value="{{ scheduler_settings.email_delay }}" min="1" max="60" required>
+                                    <div class="form-text">Delay between sending individual emails</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="scheduler_enabled" name="scheduler_enabled" 
+                                       {{ 'checked' if scheduler_settings.scheduler_enabled else '' }}>
+                                <label class="form-check-label" for="scheduler_enabled">
+                                    Enable Automated Daily Scheduler
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Scheduler Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Environment Variables -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-key"></i> Environment Variables</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('save_env_settings') }}">
+                        <div class="mb-3">
+                            <label for="email_address" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email_address" name="email_address" 
+                                   value="{{ env_settings.EMAIL_ADDRESS }}" required>
+                            <div class="form-text">Your Gmail address for sending emails</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email_app_password" class="form-label">App Password</label>
+                            <input type="password" class="form-control" id="email_app_password" name="email_app_password" 
+                                   value="{{ env_settings.EMAIL_APP_PASSWORD }}" required>
+                            <div class="form-text">Gmail App Password (not your regular password)</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="manager_email" class="form-label">Manager Email(s)</label>
+                            <textarea class="form-control" id="manager_email" name="manager_email" rows="3" 
+                                      placeholder="Enter email addresses separated by commas or new lines" required>{{ env_settings.MANAGER_EMAIL }}</textarea>
+                            <div class="form-text">Email addresses where replies will be forwarded. You can enter multiple emails separated by commas or new lines.</div>
+                        </div>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Security Note:</strong> Changing these settings will update your .env file. 
+                            Make sure to use proper App Passwords for Gmail, not regular passwords.
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Save Environment Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const intervalRadio = document.getElementById('delay_interval');
+    const timeRadio = document.getElementById('delay_time');
+    const intervalSettings = document.getElementById('interval_settings');
+    const timeSettings = document.getElementById('time_settings');
+    
+    function toggleDelaySettings() {
+        if (intervalRadio.checked) {
+            intervalSettings.style.display = 'block';
+            timeSettings.style.display = 'none';
+            document.getElementById('followup_delay_value').setAttribute('required', 'required');
+            document.getElementById('followup_delay_time').removeAttribute('required');
+        } else {
+            intervalSettings.style.display = 'none';
+            timeSettings.style.display = 'block';
+            document.getElementById('followup_delay_value').removeAttribute('required');
+            document.getElementById('followup_delay_time').setAttribute('required', 'required');
+        }
+    }
+    
+    intervalRadio.addEventListener('change', toggleDelaySettings);
+    timeRadio.addEventListener('change', toggleDelaySettings);
+    
+    // Set initial state
+    toggleDelaySettings();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,49 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3">Upload Contacts</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Upload CSV File</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Select CSV File</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                        <div class="form-text">Upload a CSV file with 'email' and 'name' columns.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Upload Contacts
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">CSV Format</h5>
+            </div>
+            <div class="card-body">
+                <p>Your CSV file should have the following format:</p>
+                <pre class="bg-light p-2 rounded">email,name
+john@example.com,John Doe
+jane@example.com,Jane Smith
+bob@example.com,Bob Johnson</pre>
+                <p class="small text-muted mt-2">
+                    The 'email' column is required. The 'name' column is optional but recommended for personalization.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

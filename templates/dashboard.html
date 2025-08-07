@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3">Email Campaign Dashboard</h1>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ stats.total_contacts }}</h4>
+                        <p class="mb-0">Total Contacts</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ stats.sent_initial }}</h4>
+                        <p class="mb-0">Initial Emails Sent</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-paper-plane fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ stats.replied }}</h4>
+                        <p class="mb-0">Replies Received</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-reply fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ stats.pending_followup }}</h4>
+                        <p class="mb-0">Pending Follow-ups</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <form method="POST" action="{{ url_for('send_initial') }}" class="d-inline">
+                            <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Send initial emails to all new contacts?')">
+                                <i class="fas fa-paper-plane"></i> Send Initial Emails
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <form method="POST" action="{{ url_for('send_followups') }}" class="d-inline">
+                            <button type="submit" class="btn btn-warning w-100" onclick="return confirm('Send follow-up emails?')">
+                                <i class="fas fa-redo"></i> Send Follow-ups
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <form method="POST" action="{{ url_for('check_replies') }}" class="d-inline">
+                            <button type="submit" class="btn btn-info w-100">
+                                <i class="fas fa-check"></i> Check Replies
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('upload_contacts') }}" class="btn btn-success w-100">
+                            <i class="fas fa-upload"></i> Upload Contacts
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('email_templates') }}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-edit"></i> Edit Templates
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('settings') }}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contact in contacts %}
+                            <tr>
+                                <td>{{ contact.email }}</td>
+                                <td>{{ contact.name or 'N/A' }}</td>
+                                <td>
+                                    {% if contact.replied %}
+                                        <span class="badge bg-success">Replied</span>
+                                    {% elif contact.initial_sent_date %}
+                                        <span class="badge bg-warning">Sent</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">New</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <a href="{{ url_for('contacts') }}" class="btn btn-sm btn-outline-primary">View All Contacts</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
